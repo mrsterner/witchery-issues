@@ -52,7 +52,7 @@ Rituals support a lot of customizable functions. They are data-driven and can ex
   "inputEntities": [
     "minecraft:pig"
   ],
-  "inputItems": [
+  "inputItems": [ //ingredient support, tag support, item support
     {
       "count": 1,
       "item": "witchery:spirit_of_otherwhere"
@@ -60,6 +60,9 @@ Rituals support a lot of customizable functions. They are data-driven and can ex
     {
       "count": 1,
       "tag": "minecraft:logs"
+    }, 
+    {
+      "id": "witchery:spirit_of_otherwhere"
     }
   ],
   "isInfinite": false,
