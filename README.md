@@ -54,10 +54,12 @@ Rituals support a lot of customizable functions. They are data-driven and can ex
   ],
   "inputItems": [
     {
-      "id": "witchery:spirit_of_otherwhere"
+      "count": 1,
+      "item": "witchery:spirit_of_otherwhere"
     }, 
     {
-      "id": "witchery:hint_of_rebirth"
+      "count": 1,
+      "item": "witchery:hint_of_rebirth"
     }
   ],
   "isInfinite": false,
