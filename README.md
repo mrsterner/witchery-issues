@@ -59,7 +59,7 @@ Rituals support a lot of customizable functions. They are data-driven and can ex
     }, 
     {
       "count": 1,
-      "item": "witchery:hint_of_rebirth"
+      "tag": "minecraft:logs"
     }
   ],
   "isInfinite": false,
