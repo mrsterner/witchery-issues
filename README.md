@@ -1,79 +1,39 @@
-
-
 <div align="center">
-  <img src="src/main/resources/logo.png" alt="Ritual Diagram" width="256"/>
+  <img src="src/main/resources/logo.png" alt="Ritual Logo" width="256"/>
 </div>
 
-# Witchery
+# Just Another Witchery Remake
 
 [![CurseForge](https://img.shields.io/badge/Download%20on-CurseForge-orange?style=flat-square)](https://legacy.curseforge.com/minecraft/mc-mods/just-another-witchery-remake)
 [![Modrinth](https://img.shields.io/badge/Download%20on-Modrinth-green?style=flat-square)](https://modrinth.com/mod/just-another-witchery-remake)
 
 ## Description
 
-Witchery adds mods stuff from the original witchery mod.
-- EMI and JEI support
+- JEI support
 - Neoforge support only as of 0.4+
-- 1.21.1
+- 1.21.1 and 26.1.2
 - Uses Modomomicon for in-game wiki
 
-## Ritual JSON Structure
-Rituals support a lot of customizable functions. They are data-driven and can execute commands.
+## JSON Structures
+<details>
+<summary>Ritual JSON, directory: ritual</summary>
+
+Rituals are data-driven and run through an ordered list of `ritual_events`. Each event is either a **requirement** (at least one has to be present), an **output** (a produced effect), or **neutral** (an ambient/ongoing effect), and all requirements need to come before anything else in the list. As soon as the first output event is reached, the ritual enters its "output phase": `altar_power` gets consumed, `altar_power_per_second` starts draining, and a sound plays. Outputs can also run in `parallel`.
+
 ```json
 {
   "type": "witchery:ritual",
-  "altarPower": 2000,
-  "altarPowerPerSecond": 0,
-  "blockMapping": {
+  "altar_power": 2000,
+  "altar_power_per_second": 0,
+  "block_mapping": {
     "G": "witchery:golden_chalk",
     "M": "witchery:otherwhere_chalk",
     "S": "witchery:otherwhere_chalk"
   },
-  "conditions": {
-    "celestialConditions": [
-      "night"
-    ],
-    "requireCat": false,
-    "weather": [
-      "storm"
-    ],
-    "ritualData": {}
-  },
-  "commands": [
-    {
-      "type": "end",
-      "command": "witchery infusion setAndKill {owner} otherwhere",
-      "maxWitchPower": 3,
-      "minWitchPower": 2
-    }
-  ],
-  "covenCount": 0,
-  "floatingItemOutput": false,
-  "inputEntities": [
-    "minecraft:pig"
-  ],
-  "inputItems": [ //ingredient support, tag support, item support
-    {
-      "count": 1,
-      "item": "witchery:spirit_of_otherwhere"
-    }, 
-    {
-      "count": 1,
-      "tag": "minecraft:logs"
-    }, 
-    {
-      "id": "witchery:spirit_of_otherwhere"
-    }
-  ],
-  "isInfinite": false,
-  "outputEntities": [
-    "witchery:demon"
-  ],
-  "outputItems": [
-    {
-      "id": "minecraft:stick"
-    }
-  ],
+  "celestial_conditions": ["night"],
+  "weather": ["storm"],
+  "require_cat": false,
+  "coven_count": 0,
   "pattern": [
     "___MMMMM___",
     "__M_____M__",
@@ -87,371 +47,126 @@ Rituals support a lot of customizable functions. They are data-driven and can ex
     "__M_____M__",
     "___MMMMM___"
   ],
-  "ritualType": {
-    "id": "witchery:empty"
-  },
-  "ticks": 0
+  "ritual_events": [
+    {
+      "type": "witchery:consume_items",
+      "items": [
+        { "count": 1, "item": "witchery:spirit_of_otherwhere" },
+        { "count": 1, "tag": "minecraft:logs" }
+      ],
+      "timeout": 400
+    },
+    {
+      "type": "witchery:consume_sacrifice",
+      "entities": ["minecraft:pig"],
+      "timeout": 600,
+      "drop": false
+    },
+    {
+      "type": "witchery:parallel",
+      "events": [
+        {
+          "type": "witchery:run_command",
+          "command": "witchery infusion setAndKill {owner} otherwhere",
+          "min_witch_power": 2,
+          "max_witch_power": 3
+        },
+        {
+          "type": "witchery:summon_item",
+          "items": [{ "count": 1, "id": "minecraft:stick" }],
+          "floating": false
+        }
+      ]
+    }
+  ]
 }
 ```
-### Fields:
 
-| Key                   | Description                                                                                                                                |
-|-----------------------|--------------------------------------------------------------------------------------------------------------------------------------------|
-| `type`                | Always `"witchery:ritual"`.                                                                                                                |
-| `altarPower`          | Amount of altar power consumed to start the ritual.                                                                                        |
-| `altarPowerPerSecond` | Amount of altar power consumed per second while the ritual is active. Only used if `isInfinite` is true or `ticks` > 0.                    |
-| `blockMapping`        | Mapping of pattern characters to block IDs.                                                                                                |
-| `conditions`          | Container for all ritual conditions (celestial, weather, cat requirement, custom data).                                                    |
-| `celestialConditions` | A list of celestial events required (`"day"`, `"night"`, `"full_moon"`, `"new_moon"`, `"waxing"`, `"waning"`). Empty means no requirement. |
-| `commands`            | A list of commands. `type` specifies when the command runs: `"start"`, `"end"`, or `"tick"`.                                               |
-| `covenCount`          | Minimum number of coven members required (0 = not required).                                                                               |
-| `floatingItemOutput`  | If `true`, output items float above the ritual center instead of dropping.                                                                 |
-| `inputEntities`       | List of entity types required as sacrifices to start the ritual. Entities are killed when consumed.                                        |
-| `inputItems`          | List of items required to start the ritual. Items are consumed from dropped items or grassper blocks.                                      |
-| `isInfinite`          | If `true`, the ritual runs indefinitely until altar power depletes or the glyph is broken. Continuously drains `altarPowerPerSecond`.      |
-| `outputEntities`      | List of entities spawned upon ritual completion.                                                                                           |
-| `outputItems`         | List of items granted after successful ritual completion.                                                                                  |
-| `pattern`             | Visual layout using characters defined in `blockMapping`, forming the ritual circle shape.                                                 |
-| `ritualType`          | Custom ritual logic. `"witchery:empty"` means no special behavior. Special effects are registered in `WitcheryRitualRegistry`.             |
-| `ticks`               | Number of ticks the ritual takes to complete (20 ticks = 1 second). `0` means instant completion.                                          |
-| `requireCat`          | If `true`, the ritual requires a cat familiar or player with an active cat familiar in their coven.                                        |
-| `weather`             | Required weather conditions: `"clear"`, `"rain"`, or `"storm"`. Empty means no weather requirement.                                        |
-| `ritualData`          | Custom NBT data passed to custom ritual implementations for additional configuration.                                                      |
-| `minWitchPower`       | Optional: Sets a required minimum witchPower required for that command to run.                                                             |
-| `maxWitchPower`       | Optional: Sets a required maximum witchPower for the command to run.                                                                       |                                                                                                                    
-#### Witch Power
-Some rituals may require help from a Cat or some Coven member to perform, Cat give 7, Coven member gives 1. The player is considered 1 member by default, so setting the min required witch power to 0 is no needed, minimum will always be 1.
+### Fields
 
-### Ritual Pattern Sizes
+| Key                     | Description                                                                                                                |
+|--------------------------|------------------------------------------------------------------------------------------------------------------------------|
+| `type`                  | Always `"witchery:ritual"`.                                                                                                  |
+| `ritual_events`         | Ordered list of ritual events (see below). Requirement events must all precede non-requirement events.                      |
+| `pattern`               | Visual layout using characters defined in `block_mapping`, forming the ritual circle shape.                                 |
+| `block_mapping`         | Mapping of pattern characters to block IDs.                                                                                  |
+| `altar_power`           | Amount of altar power consumed once the ritual enters its output phase.                                                     |
+| `altar_power_per_second`| Amount of altar power drained per second while in the output phase (ritual cancels if it can't be paid).                    |
+| `celestial_conditions`  | List of celestial events required (`"day"`, `"night"`, `"full_moon"`, `"new_moon"`, `"waxing"`, `"waning"`). Empty means no requirement. |
+| `weather`               | Required weather conditions: `"clear"`, `"rain"`, `"storm"`. Empty means no requirement.                                     |
+| `coven_count`           | Minimum number of coven members required nearby (0 means not required).                                                      |
+| `require_cat`           | If `true`, requires a cat familiar (or a coven member with one) to start the ritual.                                        |
 
-The ritual builder provides convenience methods for standard pattern sizes:
+### Ritual Events
 
-| Method                              | Pattern Size | Usage                                                      |
-|-------------------------------------|--------------|------------------------------------------------------------|
-| `addSmallPattern(block)`            | 7x7          | Basic rituals with minimal altar power requirements        |
-| `addMediumPattern(block)`           | 11x11        | Intermediate rituals                                       |
-| `addLargePattern(block)`            | 15x15        | Advanced rituals with high power requirements              |
-| `addSmallAndMediumPattern(...)`     | 11x11        | Nested small inside medium circle                          |
-| `addMediumAndLargePattern(...)`     | 15x15        | Nested medium inside large circle                          |
-| `addSmallAndLargePattern(...)`      | 15x15        | Nested small inside large circle (no medium)               |
-| `addSmallAndMediumAndLargePattern(...)` | 15x15    | All three circle sizes nested                              |
+Every event shares a common `delay` field: ticks to wait, from when its turn comes up, before it starts ticking.
+
+**Requirement**
+
+| Type                                    | Description                                                                 | Extra fields |
+|-------------------------------------------|--------------------------------------------------------------------------------|--------------|
+| `witchery:consume_items`                | Waits for matching items dropped near the chalk or held in Grasspers          | `items`, `timeout` |
+| `witchery:consume_items_with_particles` | Same as above, with particle feedback per item consumed                       | `items`, `timeout`, `particle_speed`, `particles_per_item` |
+| `witchery:consume_sacrifice`            | Waits for and kills nearby living entities of the given types                 | `entities`, `timeout`, `drop` |
+
+**Output**
+
+| Type                              | Description                                                                       | Extra fields                                                                                          |
+|-------------------------------------|-----------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------|
+| `witchery:run_command`            | Runs a command with placeholder substitution (see below)                          | `command`, `altar_power_cost`, `min_witch_power`, `max_witch_power`, `duration`, `repeat_every_ticks` |
+| `witchery:summon_item`            | Drops (or floats, if `floating`) item stacks above the chalk                      | `items`, `floating`                                                                                   |
+| `witchery:mirror_pair`            | Summons a bound mirror pair and demonic contract, used for the Mirror Demon ritual | -                                                                                                     |
+| `witchery:summon_entities`        | Spawns entities above the chalk                                                   | `entities`, `count`, `duration`                                                                       |
+| `witchery:parallel`               | Runs its child events simultaneously instead of sequentially                      | `events` (list of ritual events)                                                                      |
+| `witchery:play_sound`             | Plays a sound at the chalk                                                        | `sound_id`, `volume`, `pitch`, `duration`                                                             |
+| `witchery:spawn_particles`        | Spawns particles around the chalk                                                 | `particle`, `count`, `spread`, `speed`, `duration`                                                    |
+| `witchery:particle_disc`          | Scatters particles outward in a flat disc                                         | `count`, `radius`, `time`, `particle`                                                                 |
+| `witchery:particle_sphere`        | Scatters particles outward through a full sphere                                  | `count`, `radius`, `time`, `particle`                                                                 |
+| `witchery:particle_sphere_inward` | Particles converge inward from a radius into a sphere                             | `count`, `radius`, `time`, `speed`, `particle`                                                        |
+| `witchery:block_break_particle_disc` | Scatters block-break particles (matching the block below each point) in a disc    | `count`, `radius`, `time`                                                                             |
+| `witchery:remove_curse`           | Removes the target player's oldest active curse                                   | -                                                                                                     |
+| `witchery:bind_familiar`          | Binds a nearby unbound cat/frog/owl to a nearby player as a familiar              | `search_radius`, `search_height`                                                                      |
+| `witchery:resurrect_familiar`     | Resurrects a nearby player's dead familiar                                        | `search_radius`, `search_height`                                                                      |
+| `witchery:bind_spectral_creatures`| Chains nearby spectral entities to a nearby Effigy block                          | `search_radius`                                                                                       |
+| `witchery:bestial_call`           | Spawns a burst of random animals around the chalk                                 | `count`, `radius`                                                                                     |
+| `witchery:mine_blocks_below`      | Mines a target ore out of the column below the chalk, dropping collected items    | `target_ore_id`, `target_deepslate_ore_id`, `radius`                                                  |
+| `witchery:set_midnight`           | Sets the level's time to the next midnight                                        | -                                                                                                     |
+
+**Neutral** (ongoing/ambient effects, still have to be ordered after all requirement events, but don't themselves trigger the altar power consume or output phase transition)
+
+| Type                        | Description                                                                                  | Extra fields |
+|-------------------------------|--------------------------------------------------------------------------------------------------|--------------|
+| `witchery:rot`               | Slowly zombifies nearby villagers/pigs/horses/skeletons, rots certain meats, and withers nearby crops/flowers | `effect_radius`, `transform_delay`, `duration` |
+| `witchery:pull_mobs`         | Pulls nearby hostile mobs toward the chalk                                                       | `radius`, `strength`, `duration` |
+| `witchery:push_mobs`         | Pushes nearby hostile mobs away from the chalk                                                   | `radius`, `strength`, `duration` |
+| `witchery:raining_toad`      | Forces rain and periodically drops poisonous frogs from above for the duration                  | `duration`, `spawn_interval`, `spawn_radius`, `drop_height` |
 
 ### Command Replacements
 
-Command strings support contextual placeholders that are replaced at runtime:
+Command strings in `witchery:run_command` support contextual placeholders, replaced at runtime:
 
 | Placeholder               | Description                                          |
-|---------------------------|------------------------------------------------------|
+|----------------------------|------------------------------------------------------|
 | `{taglockPlayer}`         | Target player whose taglock was used in the ritual   |
 | `{taglockEntity}`         | Target entity whose taglock was used in the ritual   |
-| `{taglockPlayerOrEntity}` | Target player OR entity (whichever taglock was used) |
+| `{taglockPlayerOrEntity}` | Target player OR entity, whichever taglock was used  |
 | `{waystonePos}`           | Coordinates of the waystone's bound position         |
-| `{time}`                  | Current level day time                               |
-| `{owner}`                 | Player who started the ritual                        |
-| `{chalkPos}`              | Block position of the ritual center (golden chalk)   |
-| `{witchPower}`            | The Casters Witch Power, calc from Cat and Coven     |    
-
-## Other Recipe examples
-
-<details>
-<summary>Brazier Summoning JSON</summary>
-
-```json
-{
-  "type": "witchery:brazier_summoning",
-  "altarPower": 500,
-  "inputItems": [
-    {
-      "count": 1,
-      "id": "witchery:wormwood"
-    },
-    {
-      "count": 1,
-      "id": "witchery:condensed_fear"
-    },
-    {
-      "count": 1,
-      "id": "witchery:spectral_dust"
-    }
-  ],
-  "outputEntities": [
-    "witchery:banshee"
-  ]
-}
-```
-
-</details>
-
-<details>
-<summary>Cauldron Brewing JSON</summary>
-
-```json
-{
-  "type": "witchery:cauldron_brewing",
-  "altarPower": 100,
-  "dimensionKey": [
-    ""
-  ],
-  "inputItems": [
-    {
-      "color": -13487566,
-      "itemStack": {
-        "count": 1,
-        "id": "witchery:oil_of_vitriol"
-      },
-      "order": 0
-    },
-    {
-      "color": -13495246,
-      "itemStack": {
-        "count": 1,
-        "id": "witchery:oil_of_vitriol"
-      },
-      "order": 1
-    },
-    {
-      "color": -10197986,
-      "itemStack": {
-        "count": 1,
-        "id": "witchery:wood_ash"
-      },
-      "order": 2
-    },
-    {
-      "color": -3314106,
-      "itemStack": {
-        "count": 1,
-        "id": "minecraft:magma_cream"
-      },
-      "order": 3
-    },
-    {
-      "color": -52566,
-      "itemStack": {
-        "count": 1,
-        "id": "witchery:belladonna_flower"
-      },
-      "order": 4
-    },
-    {
-      "color": -10850766,
-      "itemStack": {
-        "count": 1,
-        "id": "minecraft:dandelion"
-      },
-      "order": 5
-    }
-  ],
-  "outputItem": {
-    "count": 1,
-    "id": "witchery:brew_of_erosion"
-  }
-}
-```
-
-</details>
-
-<details>
-<summary>Cauldron Crafting JSON</summary>
-
-```json
-{
-  "type": "witchery:cauldron_crafting",
-  "altarPower": 100,
-  "inputItems": [
-    {
-      "color": -10210766,
-      "itemStack": {
-        "count": 1,
-        "id": "witchery:mandrake_root"
-      },
-      "order": 0
-    },
-    {
-      "color": -52686,
-      "itemStack": {
-        "count": 1,
-        "id": "minecraft:nether_wart"
-      },
-      "order": 1
-    },
-    {
-      "color": -13159686,
-      "itemStack": {
-        "count": 1,
-        "id": "witchery:tear_of_the_goddess"
-      },
-      "order": 2
-    },
-    {
-      "color": -15461356,
-      "itemStack": {
-        "count": 1,
-        "id": "witchery:refined_evil"
-      },
-      "order": 3
-    },
-    {
-      "color": -13495276,
-      "itemStack": {
-        "count": 1,
-        "id": "witchery:mutandis_extremis"
-      },
-      "order": 4
-    }
-  ],
-  "outputItems": [
-    {
-      "count": 1,
-      "id": "witchery:drop_of_luck"
-    }
-  ]
-}
-```
-
-</details>
-
-<details>
-<summary>Distillery Crafting JSON</summary>
-
-```json
-{
-  "type": "witchery:distillery_crafting",
-  "altarPower": 5,
-  "cookingTime": 100,
-  "inputItems": [
-    {
-      "count": 1,
-      "id": "witchery:brew_of_flowing_spirit"
-    },
-    {
-      "count": 1,
-      "id": "witchery:oil_of_vitriol"
-    }
-  ],
-  "jarConsumption": 2,
-  "outputItems": [
-    {
-      "count": 1,
-      "id": "witchery:focused_will"
-    },
-    {
-      "count": 1,
-      "id": "witchery:condensed_fear"
-    }
-  ]
-}
-```
-
-</details>
-
-<details>
-<summary>Oven Cooking JSON</summary>
-
-```json
-{
-  "type": "witchery:oven_cooking",
-  "cookingTime": 85,
-  "experience": 0.5,
-  "extraIngredient": {
-    "item": "witchery:jar"
-  },
-  "extraOutput": {
-    "id": "witchery:breath_of_the_goddess"
-  },
-  "extraOutputChance": 0.5,
-  "ingredient": {
-    "item": "minecraft:birch_sapling"
-  },
-  "result": {
-    "id": "witchery:wood_ash"
-  }
-}
-```
-
-</details>
-
-<details>
-<summary>Spinning Wheel JSON</summary>
-
-```json
-{
-  "type": "witchery:spinning_wheel",
-  "altarPower": 5,
-  "cookingTime": 100,
-  "inputItems": [
-    {
-      "count": 1,
-      "id": "witchery:dream_weaver"
-    },
-    {
-      "components": {
-        "minecraft:potion_contents": {
-          "potion": "minecraft:healing"
-        }
-      },
-      "count": 1,
-      "id": "minecraft:splash_potion"
-    },
-    {
-      "count": 1,
-      "id": "witchery:mellifluous_hunger"
-    },
-    {
-      "count": 2,
-      "id": "witchery:fanciful_thread"
-    }
-  ],
-  "outputItem": {
-    "count": 1,
-    "id": "witchery:dream_weaver_of_fasting"
-  }
-}
-```
-</details>
-
-## Other data-driven stuff
-
-<details>
-<summary>Erosion Brew block transformation JSON, directory: erosion</summary>
-
-```json
-{
-  "fromBlock": "minecraft:grass_block",
-  "toBlock": "minecraft:coarse_dirt"
-}
-```
-
-</details>
-
-<details>
-<summary>Blood quality JSON, directory: blood_pool</summary>
-
-```json
-{
-  "bloodDrops": 5,
-  "entityType": "minecraft:villager",
-  "qualityBloodDrops": 2
-}
-```
-</details>
-
-
-<details>
-<summary>Censer Infinity Potions JSON, directory: infinite_censer</summary>
-This will make the censer never run out of the potion.
-
-```json
-{
-  "potion": "minecraft:long_leaping"
-}
-```
+| `{ownerPos}`               | Current position of the ritual's owner               |
+| `{moonPhase}`              | Current moon phase name                              |
+| `{weather}`                | Current weather: `clear`, `rain`, or `storm`         |
+| `{isDay}`                  | `true`/`false`, whether it's currently daytime       |
+| `{dimension}`              | Dimension the ritual is running in                   |
+| `{witchPower}`             | The caster's Witch Power, calculated from cat/coven  |
+| `{owner}`                  | Player who started the ritual                        |
+| `{chalkPos}`               | Block position of the ritual center (golden chalk)   |
+| `{targetBiome}`            | Biome bound to a Biome Note used in the ritual       |
 
 </details>
 
 <details>
 <summary>Nature Altar power JSON, directory: nature</summary>
-Limit is how many one altar can take. Power is power per block
+
+Limit is how much power one altar can take. Power is power per block. Matches either a specific `block` or a `tag`.
 
 ```json
 {
@@ -460,50 +175,37 @@ Limit is how many one altar can take. Power is power per block
   "power": 4
 }
 ```
-
-</details>
-
-<details>
-<summary>Witchery Potion ingredients JSON, directory: potion</summary>
-Capacity cost is negative since it takes a capacity slot to use this ingredient. 
-
+or
 ```json
 {
-  "altar_power": 200,
-  "base_duration": 900,
-  "capacity_cost": -1,
-  "color": -32236,
-  "effect": "minecraft:strength",
-  "item": {
-    "count": 1,
-    "id": "minecraft:blaze_powder"
-  }
+  "tag": "minecraft:crops",
+  "limit": 20,
+  "power": 4
 }
 ```
 
 </details>
 
 <details>
-<summary>Altar Augments JSON, directory: altar_augments </summary>
+<summary>Altar Augments JSON, directory: altar_augments</summary>
 
-Semi-full JSON:
+A fuller example:
 ```json
 {
-  "type": "witchery:altar_augment",
   "block": "minecraft:skeleton_skull",
   "category": "head",
   "bonus": {
-    "lightBonus": 0.0,
-    "headBonus": 0.15,
-    "chaliceBonus": 0.0,
-    "rangeMultiplier": 1.0,
-    "hasPentacle": false,
-    "hasInfinityEgg": false
+    "light_bonus": 0.0,
+    "head_bonus": 0.15,
+    "chalice_bonus": 0.0,
+    "range_multiplier": 1.0,
+    "has_pentacle": false,
+    "has_infinity_egg": false
   }
 }
 ```
 
-The JSON doesn't need all the fields:
+You don't need to fill in every field:
 ```json
 {
   "block": "witchery:chalice",
@@ -513,40 +215,129 @@ The JSON doesn't need all the fields:
   "category": "chalice"
 }
 ```
-Also support the LIT BlockStateProperty and block tags
+
+Matches by `block` or by `tag`, and can also require specific blockstate values via `state_conditions`:
 ```json
 {
+  "tag": "witchery:candelabras",
   "bonus": {
     "light_bonus": 2.0
   },
   "category": "light",
-  "requires_lit": true,
-  "tag": "witchery:candelabras"
+  "state_conditions": [
+    { "property": "lit", "value": "true" }
+  ]
 }
-``` 
+```
 
 ### Augment Categories
 
-Augments are organized into 5 categories. Only the **best** (highest bonus) augment of each category applies - multiple augments of the same category don't stack.
+Augments are split into 5 categories. Only the best augment in each category applies, so multiple augments of the same category don't stack.
 
 | Category | Effect                                                          |
 |----------|-----------------------------------------------------------------|
-| `light` | Increases **power multiplier** - affects power generation rate  |
+| `light` | Increases **power multiplier**. Affects power generation rate   |
 | `head` | Increases both **power multiplier** and **power boost**         |
-| `chalice` | Increases **power boost** - adds flat power to max capacity     |
+| `chalice` | Increases **power boost**. Adds flat power to max capacity      |
 | `range` | Multiplies the altar's detection range for nature power sources |
-| `special` | Unique effects like `hasPentacle` or `hasInfinityEgg`           |
+| `special` | Unique effects like `has_pentacle` or `has_infinity_egg`        |
 
 ### Bonus Fields
 
 | Field | Type | Description |
 |-------|------|-------------|
-| `lightBonus` | double | Percentage increase to power multiplier (0.1 = 10% faster charging) |
-| `headBonus` | double | Percentage increase to both power multiplier AND power boost (0.15 = 15% faster + 15% more max power) |
-| `chaliceBonus` | double | Percentage increase to power boost only (0.2 = 20% more max power) |
-| `rangeMultiplier` | double | Multiplies altar's detection range (2.0 = double range) |
-| `hasPentacle` | boolean | If true, doubles the final power multiplier |
-| `hasInfinityEgg` | boolean | If true, multiplies power multiplier by 10 and power boost by 2 |
+| `light_bonus` | double | Percentage increase to power multiplier (0.1 = 10% faster charging) |
+| `head_bonus` | double | Percentage increase to both power multiplier and power boost (0.15 = 15% faster and 15% more max power) |
+| `chalice_bonus` | double | Percentage increase to power boost only (0.2 = 20% more max power) |
+| `range_multiplier` | double | Multiplies altar's detection range (2.0 = double range) |
+| `has_pentacle` | boolean | If true, doubles the final power multiplier |
+| `has_infinity_egg` | boolean | If true, multiplies power multiplier by 10 and power boost by 2 |
+
+### State Conditions
+
+`state_conditions` is a list of `{ "property": "<blockstate property name>", "value": "<expected value>" }` pairs. Every property listed has to match the block's current state for the augment to apply, for example requiring a candle block to be `lit=true`.
+
+</details>
+
+<details>
+<summary>Fetish Effect JSON, directory: fetish</summary>
+
+Maps a combination of trapped spirit counts to a fetish effect.
+
+```json
+{
+  "poltergeist_count": 1,
+  "banshee_count": 2,
+  "specter_count": 0,
+  "effect": "witchery:shrieking"
+}
+```
+
+| Field | Description |
+|-------|-------------|
+| `poltergeist_count` | Required number of poltergeists (optional, default 0) |
+| `banshee_count` | Required number of banshees (optional, default 0) |
+| `specter_count` | Required number of specters (optional, default 0) |
+| `effect` | The fetish effect to grant when the counts match |
+
+</details>
+
+<details>
+<summary>Hobgoblin Trades JSON, directory: hobgoblin_trades</summary>
+
+```json
+{
+  "costA": "minecraft:emerald",
+  "costACount": 1,
+  "costB": "witchery:spirit_of_otherwhere",
+  "costBCount": 1,
+  "result": "witchery:drop_of_luck",
+  "resultCount": 1,
+  "maxUses": 12,
+  "xp": 1,
+  "priceMultiplier": 0.05
+}
+```
+
+</details>
+
+<details>
+<summary>Overworld Infusion metal extraction JSON, directory: overworld_infusion</summary>
+
+Used by the Overworld infusion type's metal extraction ability: right-clicking a mapped metal block (costs 100 infusion charge) drops 2 of `item` and turns the block into `toBlock`.
+
+```json
+{
+  "fromBlock": "minecraft:iron_ore",
+  "toBlock": "minecraft:stone",
+  "item": "minecraft:iron_ingot"
+}
+```
+
+</details>
+
+## Addon-specific data-driven stuff
+
+<details>
+<summary>Imp Trades JSON, directory: imp_trades (JAWR Forbidden Magic only)</summary>
+
+> Requires the JAWR: Forbidden Magic addon.
+
+Defines soul-trading offers sold by imps. `count` is optional and defaults to 1.
+
+```json
+{
+  "item": "witchery:spirit_of_otherwhere",
+  "count": 1,
+  "soulCost": 50
+}
+```
+
+| Field | Description |
+|-------|-------------|
+| `item` | Item granted by the trade |
+| `count` | Quantity granted (optional, default 1) |
+| `soulCost` | Number of souls the trade costs |
 
 </details>
 
