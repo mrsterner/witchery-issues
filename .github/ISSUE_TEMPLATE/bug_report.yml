@@ -1,0 +1,41 @@
+name: Bug Report
+description: Report a bug in the mod
+title: "[Bug]: "
+labels: ["bug"]
+body:
+  - type: dropdown
+    id: minecraft-version
+    attributes:
+      label: Minecraft Version
+      description: Which Minecraft version were you playing on?
+      options:
+        - "1.21.1"
+        - "26.1.2"
+    validations:
+      required: true
+
+  - type: input
+    id: mod-version
+    attributes:
+      label: Mod Version
+      description: The exact version number of the mod you're using
+      placeholder: e.g. 0.5.5
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: What happened, and what did you expect to happen?
+    validations:
+      required: true
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs / Crash Report
+      description: Paste relevant log or crash report content, or a link to a paste site
+      render: shell
+    validations:
+      required: false
