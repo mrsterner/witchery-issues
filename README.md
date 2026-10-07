@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="src/main/resources/logo.png" alt="Ritual Logo" width="256"/>
+  <img src="logo.png" alt="Ritual Logo" width="256"/>
 </div>
 
 # Just Another Witchery Remake
