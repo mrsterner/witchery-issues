@@ -58,7 +58,12 @@ Rituals are data-driven and run through an ordered list of `ritual_events`. Each
     },
     {
       "type": "witchery:consume_sacrifice",
-      "entities": ["minecraft:pig"],
+      "entities": [
+        "minecraft:pig",
+        ["minecraft:villager", "minecraft:cow"],
+        "#minecraft:raiders",
+        ["#c:animals", "minecraft:villager"]
+      ],
       "timeout": 600,
       "drop": false
     },
@@ -107,8 +112,21 @@ Every event shares a common `delay` field: ticks to wait, from when its turn com
 |-------------------------------------------|--------------------------------------------------------------------------------|--------------|
 | `witchery:consume_items`                | Waits for matching items dropped near the chalk or held in Grasspers          | `items`, `timeout` |
 | `witchery:consume_items_with_particles` | Same as above, with particle feedback per item consumed                       | `items`, `timeout`, `particle_speed`, `particles_per_item` |
-| `witchery:consume_sacrifice`            | Waits for and kills nearby living entities of the given types                 | `entities`, `timeout`, `drop` |
+| `witchery:consume_sacrifice`            | Waits for and kills nearby living entities, one per slot in `entities` (see below) | `entities`, `timeout`, `drop` |
 
+### Sacrifice Entries
+
+`entities` is an ordered list of slots. Each slot needs one sacrifice, filled in order, so the list length is the total number of sacrifices required. A slot is one of:
+
+| Form | Example | Meaning |
+|------|---------|---------|
+| Entity type | `"minecraft:pig"` | Needs exactly that entity type |
+| Entity tag | `"#minecraft:raiders"` | Needs any entity in that entity type tag |
+| Any-of list | `["minecraft:villager", "minecraft:cow"]` | Needs any ONE of the listed types or tags |
+
+Any-of lists can mix types and tags, e.g. `["#c:animals", "minecraft:villager"]`. Tags use the `#` prefix and live in `data/<namespace>/tags/entity_type/`.
+
+An any-of list is one slot, not one per option. To require several sacrifices, add several slots (e.g. three cows is three `"minecraft:cow"` entries).
 **Output**
 
 | Type                              | Description                                                                       | Extra fields                                                                                          |
