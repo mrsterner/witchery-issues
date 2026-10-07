@@ -364,3 +364,89 @@ Defines soul-trading offers sold by imps. `count` is optional and defaults to 1.
 - Texture of Taglock is made by WK/AtheneNoctua.
 - Model and texture of Hunter Armor is made by TheRebelT
 - Tarot Arcana Major by [starsinabox](https://starsinabox.itch.io/majorarcana)
+
+# Changelog
+
+## 0.5.13
+
+### Additions
+- Added Dispenser behaviour for witchery brews and potions
+- Added missing Garlic loot table
+- Added config for vampire immortality
+- Added config for vampire sun damage protection in dimensions
+- Added Sacrifice ritual support entity tags and either or entities.
+- Added support for clear vampirism and lycantropy for remove curse ritual.
+
+### Changes
+- Tweak village structure spawn
+- Made level 2 -> 3 vamp quest text more clear
+
+### Fixes
+- Tweaked poppets to hopefully fix poppet disconnect
+- Fixed Arthana dissapearing on world reload
+- Fixed Owl
+- Fixed missing lang for advancements
+- Fixed baby animals not having a blood pool
+- Fixed vampire food to support tag
+- Fixed kick when going to spirit world sometimes
+
+## 0.5.12
+
+### Additions
+- NeoVitae compat: Added empowered bloodstone pendant allowing replenishing one's blood from Anima
+- Icy slippers
+- More book entries
+- Blacklist config for mutandis
+
+### Changes
+
+### Fixes
+- empowered sunstone pendant is now visible in JEI
+- Fixed server crash with forbidden magic related to creative tab banners
+- Some book entries are advancement gated (26.1.2)
+- Werewolf book entry trigger
+
+## 0.5.11
+
+### Additions
+- Some villages will have Walls and Watchtowers
+- Garlic now damages vampires
+
+### Changes
+- NeoVitae integration reworked: vampires drink blood from orb and altar now, not from Anima directly
+
+### Fixes
+- Fixed quest system only showing up in singleplayer
+- Fixed Vampire bat flying thorugh village quest to be more generous with area
+- Sacrifical circle can now be assembled with the skull last
+- Sacrifical circle needs solid ground under it
+- Wine glass acting weird in off-hand
+- Skull renders correctly in sacrifical circle (1.21.1)
+- abilities should now all be visible on smaller screens
+
+-----
+## 0.5.10
+
+### Additions
+- Appleskin support for Vampire, hides overlay
+- Compatibiltiy with NeoVitae, vampires can feed off Anima network when holding a blood orb and using drink ability
+
+### Changes
+- Set default config for enable empowered charms to false.
+- Made Vamp not able to gain fire resistance
+- Increased Bone Needle self stab damage from 2 to 4
+- Running out of blood causes Vampires to become weak
+- Sun damage doesn't affect vampires during rain or thunder
+- Regular food causes Vampires to get nausea and hunger
+
+### Fixes
+- Fixed vampire immortality to not block everything.
+- Fixed Vampires blood drink ability not killing entities with 0 blood.
+- Fixed render box for Cage.
+- Fixed Blood particle height for sleeping villagers.
+- Fixed Voodoo poppet unable to get stabbed by bone needle
+- Fixed Bone needle use durability
+- Fixed Bone needle crafting durability
+- Fixed vampire drink blood ability hurting transfixed villagers
+- Fixed cage not dropping its item when top block was broken
+
