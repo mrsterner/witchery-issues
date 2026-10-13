@@ -1,0 +1,40 @@
+name: Suggestion
+description: Give a suggestion in the mod
+title: "[Suggestion]: "
+labels: ["Suggestion"]
+body:
+  - type: dropdown
+    id: minecraft-version
+    attributes:
+      label: Minecraft Version
+      description: Which Minecraft version were you playing on?
+      options:
+        - "1.21.1"
+        - "26.1.2"
+    validations:
+      required: true
+
+  - type: input
+    id: mod-version
+    attributes:
+      label: Mod Version
+      description: The exact version number of the mod you're using
+      placeholder: e.g. 0.5.5
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: What would you like, and how do you expect it to work?
+    validations:
+      required: true
+
+  - type: textarea
+    id: examples
+    attributes:
+      label: Examples
+      description: Paste relevant resources to be used as an example
+    validations:
+      required: false
